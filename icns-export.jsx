@@ -2,6 +2,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2014 Christian Hoffmeister
+ * Copyright (c) 2019 Epsitec SA
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +22,12 @@
  * SOFTWARE.
  */
 
-(function () {
+(function() {
   var doc = null;
   try {
     doc = app.activeDocument;
   } catch (ex) {
-    alert('You must have an active document');
+    alert("You must have an active document");
     return;
   }
 
@@ -34,50 +35,77 @@
   var width = ab.artboardRect[2] - ab.artboardRect[0];
   var height = ab.artboardRect[1] - ab.artboardRect[3];
 
-  if (doc.path == '' || !doc.saved) {
-    alert('You must save your document before exporting it');
+  if (doc.path == "" || !doc.saved) {
+    alert("You must save your document before exporting it");
     return;
   }
 
   if (width != 1024 || height != 1024) {
-    alert('Your document has size ' + width + 'x' + height + ' pixels, but must have size 1024x1024 pixels');
+    alert(
+      "Your document has size " +
+        width +
+        "x" +
+        height +
+        " pixels, but must have size 1024x1024 pixels"
+    );
     return;
   }
 
-  var file = getTargetFile(doc, '.icns');
+  var file = getTargetFile(doc, ".icns");
   if (!file) {
-    alert('Canceled export');
+    alert("Canceled export");
     return;
   }
+
+  var apps = ["cs", "cc", "cf", "pe"];
+  var variant = ["safe", "doc"];
 
   var formats = [
-    // Quick fix for https://github.com/choffmeister/adobe-illustrator-icnsexport/issues/7
-    // { type: 'icp4', size: 16 },
-    // { type: 'icp5', size: 32 },
-    // { type: 'icp6', size: 64 },
-    { type: 'ic07', size: 128 },
-    { type: 'ic08', size: 256 },
-    { type: 'ic09', size: 512 },
-    { type: 'ic10', size: 1024 },
-    { type: 'ic11', size: 32 },
-    { type: 'ic12', size: 64 },
-    { type: 'ic13', size: 256 },
-    { type: 'ic14', size: 512 }
-  ]
+    { type: "icp4", size: 16 },
+    { type: "ic07", size: 128 },
+    { type: "ic08", size: 256 },
+    { type: "ic09", size: 512 },
+    { type: "ic10", size: 1024 },
+    { type: "ic11", size: 32 },
+    { type: "ic12", size: 64 },
+    { type: "ic13", size: 256 },
+    { type: "ic14", size: 512 }
+  ];
 
-  var totalLength = 0;
+  function genItemsName() {
+    return apps.reduce(function(names, app) {
+      formats.reduce(function(names, f) {
+        names.push(app + "_" + f.size + "x" + f.size);
+        variant.reduce(function(names, v) {
+          names.push(app + "_" + v + "_" + f.size + "x" + f.size);
+          return names;
+        }, names);
+        return names;
+      }, names);
+      return names;
+    }, []);
+  }
+  var items = genItemsName();
+  for (var item of doc.graphItems) {
+    if (items.includes(item.name)) {
+      //todo export
+      alert(item.name);
+    }
+  }
+
+  /*var totalLength = 0;
   for (var i = 0; i < formats.length; i++) {
     var format = formats[i];
-    var filePng = new File(Folder.temp + '/icns-export-temp.png');
+    var filePng = new File(Folder.temp + "/icns-export-temp.png");
     exportAsPng(filePng, format.size);
     format.png = readFile(filePng);
     totalLength += format.png.length;
   }
   doc.save();
 
-  openFile(file, 'w');
+  openFile(file, "w");
 
-  writeString(file, 'icns');
+  writeString(file, "icns");
   writeInt(file, 8 + 8 * formats.length + totalLength);
   for (var i = 0; i < formats.length; i++) {
     var format = formats[i];
@@ -87,8 +115,7 @@
   }
 
   closeFile(file);
-  alert('Exported to ' + decodeURIComponent(file.toString()));
-
+  alert("Exported to " + decodeURIComponent(file.toString()));*/
 
   function writeInt(file, i) {
     var a = String.fromCharCode((i >> 24) & 255);
@@ -103,7 +130,7 @@
   }
 
   function readFile(file) {
-    openFile(file, 'r');
+    openFile(file, "r");
     var result = file.read();
     closeFile(file);
     file.remove();
@@ -111,8 +138,8 @@
   }
 
   function openFile(file, mode) {
-    file.encoding = 'BINARY';
-    if (!file.open(mode)) throw new Error('Could not read ' + file);
+    file.encoding = "BINARY";
+    if (!file.open(mode)) throw new Error("Could not read " + file);
   }
 
   function closeFile(file) {
@@ -125,31 +152,34 @@
     exp.antiAliasing = true;
     exp.transparency = this.transparency;
     exp.artBoardClipping = true;
-    exp.horizontalScale = size / 1024.0 * 100.0;
-    exp.verticalScale = size / 1024.0 * 100.0;
+    exp.horizontalScale = (size / 1024.0) * 100.0;
+    exp.verticalScale = (size / 1024.0) * 100.0;
     exp.transparency = true;
 
     doc.exportFile(file, expType, exp);
   }
 
   function getTargetFile(doc, ext) {
-    var destFolder = Folder.selectDialog('Select folder for ' + ext + ' file.', '~');
+    var destFolder = Folder.selectDialog(
+      "Select folder for " + ext + " file.",
+      "~"
+    );
 
     if (destFolder) {
-      var newName = '';
+      var newName = "";
 
       // if name has no dot (and hence no extension),
       // just append the extension
-      if (doc.name.indexOf('.') < 0) {
+      if (doc.name.indexOf(".") < 0) {
         newName = doc.name + ext;
       } else {
-        var dot = doc.name.lastIndexOf('.');
+        var dot = doc.name.lastIndexOf(".");
         newName += doc.name.substring(0, dot);
         newName += ext;
       }
 
       // Create the file object to save to
-      return new File(destFolder + '/' + newName);
+      return new File(destFolder + "/" + newName);
     } else {
       return null;
     }
