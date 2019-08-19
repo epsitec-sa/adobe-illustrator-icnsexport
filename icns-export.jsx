@@ -118,19 +118,33 @@
     return;
   }
 
-  var apps = ["cs", "cc", "cf", "pe"];
-  var variant = ["safe", "doc"];
+  var apps = [
+    "cs",
+    "cc",
+    "cf",
+    "pe",
+    "cs_safe",
+    "cc_safe",
+    "cf_safe",
+    "pe_safe",
+    "cs_doc",
+    "cc_doc",
+    "cf_doc",
+    "pe_doc"
+  ];
 
   var formats = [
     { type: "icp4", size: 16 },
+    { type: "icp5", size: 32 },
+    { type: "icp6", size: 64 },
     { type: "ic07", size: 128 },
     { type: "ic08", size: 256 },
     { type: "ic09", size: 512 },
-    { type: "ic10", size: 1024 },
     { type: "ic11", size: 32 },
     { type: "ic12", size: 64 },
     { type: "ic13", size: 256 },
-    { type: "ic14", size: 512 }
+    { type: "ic14", size: 512 },
+    { type: "ic10", size: 1024 }
   ];
 
   var itemsFormat = {};
@@ -143,15 +157,6 @@
         itemsFormat[name].app = appName;
         itemsFormat[name].type = f.type;
         itemsFormat[name].size = f.size;
-        variant.reduce(function(names, v) {
-          var name = appName + "_" + v + "_" + f.size + "x" + f.size;
-          names.push(name);
-          itemsFormat[name] = {};
-          itemsFormat[name].app = appName;
-          itemsFormat[name].type = f.type;
-          itemsFormat[name].size = f.size;
-          return names;
-        }, names);
         return names;
       }, names);
       return names;
