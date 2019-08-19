@@ -135,19 +135,19 @@
 
   var itemsFormat = {};
   function genItemsName() {
-    return apps.reduce(function(names, app) {
+    return apps.reduce(function(names, appName) {
       formats.reduce(function(names, f) {
-        var name = app + "_" + f.size + "x" + f.size;
+        var name = appName + "_" + f.size + "x" + f.size;
         names.push(name);
         itemsFormat[name] = {};
-        itemsFormat[name].app = app;
+        itemsFormat[name].app = appName;
         itemsFormat[name].type = f.type;
         itemsFormat[name].size = f.size;
         variant.reduce(function(names, v) {
-          var name = app + "_" + v + "_" + f.size + "x" + f.size;
+          var name = appName + "_" + v + "_" + f.size + "x" + f.size;
           names.push(name);
           itemsFormat[name] = {};
-          itemsFormat[name].app = app;
+          itemsFormat[name].app = appName;
           itemsFormat[name].type = f.type;
           itemsFormat[name].size = f.size;
           return names;
@@ -159,11 +159,11 @@
   }
 
   var items = genItemsName();
-  var icnsApps = apps.reduce(function(icns, app) {
-    icns[app] = {};
-    icns[app].handle = getTargetFile(doc, app + ".icns");
-    icns[app].totalLength = 0;
-    icns[app].exported = [];
+  var icnsApps = apps.reduce(function(icns, a) {
+    icns[a] = {};
+    icns[a].handle = getTargetFile(doc, a + ".icns");
+    icns[a].totalLength = 0;
+    icns[a].exported = [];
     return icns;
   }, {});
 
@@ -171,17 +171,17 @@
     var ab = doc.artboards[i];
     if (items.includes(ab.name)) {
       var format = itemsFormat[ab.name];
-      var app = icnsApps[format.app];
+      var appX = icnsApps[format.app];
       var path = Folder.temp + "/" + ab.name + ".png";
       var filePng = new File(path);
       exportAsPng(filePng, i, format.size);
       format.png = readFile(filePng);
-      app.exported.push(format);
-      app.totalLength += format.png.length;
+      appX.exported.push(format);
+      appX.totalLength += format.png.length;
     }
   }
 
-  for (var a = 0; a < app.length; a++) {
+  for (var a = 0; a < apps.length; a++) {
     var icns = icnsApps[a];
     var icnsFile = icns.handle;
     openFile(icnsFile, "w");
