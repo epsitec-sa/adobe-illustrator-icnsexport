@@ -161,10 +161,9 @@
 
   for (var i = 0; i < doc.artboards.length; i++) {
     var ab = doc.artboards[i];
-    alert(ab.name);
     if (items.includes(ab.name)) {
       //todo export
-      alert(ab.name);
+      alert("Export de " + ab.name);
     }
   }
 
