@@ -140,14 +140,16 @@
         var name = app + "_" + f.size + "x" + f.size;
         names.push(name);
         itemsFormat[name] = {};
-        itemsFormat.type = f.type;
-        itemsFormats.size = f.size;
+        itemsFormat[name].app = app;
+        itemsFormat[name].type = f.type;
+        itemsFormat[name].size = f.size;
         variant.reduce(function(names, v) {
           var name = app + "_" + v + "_" + f.size + "x" + f.size;
           names.push(name);
           itemsFormat[name] = {};
-          itemsFormat.type = f.type;
-          itemsFormats.size = f.size;
+          itemsFormat[name].app = app;
+          itemsFormat[name].type = f.type;
+          itemsFormat[name].size = f.size;
           return names;
         }, names);
         return names;
@@ -157,34 +159,44 @@
   }
 
   var items = genItemsName();
-  var icnsFile = getTargetFile(doc, ".icns");
-  var exported = [];
-  var totalLength = 0;
+  var icnsApps = apps.reduce(function(icns, app) {
+    icns[app] = {};
+    icns[app].handle = getTargetFile(doc, app + ".icns");
+    icns[app].totalLength = 0;
+    icns[app].exported = [];
+    return icns;
+  }, {});
+
   for (var i = 0; i < doc.artboards.length; i++) {
     var ab = doc.artboards[i];
     if (items.includes(ab.name)) {
       var format = itemsFormat[ab.name];
-      var filePng = new File(Folder.temp + "/icns-export-temp.png");
+      var app = icnsApps[format.app];
+      var path = Folder.temp + "/" + ab.name + ".png";
+      var filePng = new File(path);
       exportAsPng(filePng, i, format.size);
       format.png = readFile(filePng);
-      exported.push(format);
-      totalLength += format.png.length;
+      app.exported.push(format);
+      app.totalLength += format.png.length;
     }
   }
 
-  openFile(icnsFile, "w");
+  for (var a = 0; a < app.length; a++) {
+    var icns = icnsApps[a];
+    var icnsFile = icns.handle;
+    openFile(icnsFile, "w");
+    writeString(icnsFile, "icns");
+    writeInt(icnsFile, 8 + 8 * formats.length + icns.totalLength);
+    for (var i = 0; i < icns.exported.length; i++) {
+      var format = icns.exported[i];
+      writeString(icnsFile, format.type);
+      writeInt(icnsFile, format.png.length + 8);
+      writeString(icnsFile, format.png);
+    }
 
-  writeString(icnsFile, "icns");
-  writeInt(icnsFile, 8 + 8 * formats.length + totalLength);
-  for (var i = 0; i < exported.length; i++) {
-    var format = exported[i];
-    writeString(icnsFile, format.type);
-    writeInt(icnsFile, format.png.length + 8);
-    writeString(icnsFile, format.png);
+    closeFile(icnsFile);
+    alert("Exported to " + decodeURIComponent(icnsFile.toString()));
   }
-
-  closeFile(icnsFile);
-  alert("Exported to " + decodeURIComponent(icnsFile.toString()));
 
   function writeInt(file, i) {
     var a = String.fromCharCode((i >> 24) & 255);
@@ -225,8 +237,8 @@
     exp.verticalScale = size;
     exp.transparency = true;
     exp.matte = true;
-    doc.artboards.setActiveArtboardIndex(artboardIndex);
 
+    doc.artboards.setActiveArtboardIndex(artboardIndex);
     doc.exportFile(file, expType, exp);
   }
 
