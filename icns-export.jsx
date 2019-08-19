@@ -23,31 +23,25 @@
  */
 
 (function() {
-  Array.prototype.includes ||
-    Object.defineProperty(Array.prototype, "includes", {
-      value: function(r, e) {
-        if (null == this) throw new TypeError('"this" is null or not defined');
-        var t = Object(this),
-          n = t.length >>> 0;
-        if (0 === n) return !1;
-        var i,
-          o,
-          a = 0 | e,
-          u = Math.max(0 <= a ? a : n - Math.abs(a), 0);
-        for (; u < n; ) {
-          if (
-            (i = t[u]) === (o = r) ||
-            ("number" == typeof i &&
-              "number" == typeof o &&
-              isNaN(i) &&
-              isNaN(o))
-          )
-            return !0;
-          u++;
-        }
-        return !1;
-      }
-    });
+  Array.prototype.includes = function(r, e) {
+    if (null == this) throw new TypeError('"this" is null or not defined');
+    var t = Object(this),
+      n = t.length >>> 0;
+    if (0 === n) return !1;
+    var i,
+      o,
+      a = 0 | e,
+      u = Math.max(0 <= a ? a : n - Math.abs(a), 0);
+    for (; u < n; ) {
+      if (
+        (i = t[u]) === (o = r) ||
+        ("number" == typeof i && "number" == typeof o && isNaN(i) && isNaN(o))
+      )
+        return !0;
+      u++;
+    }
+    return !1;
+  };
 
   /**
    * Array.prototype.reduce() polyfill
@@ -55,66 +49,61 @@
    * @author Chris Ferdinandi
    * @license MIT
    */
-  if (!Array.prototype.reduce) {
-    Array.prototype.reduce = function(callback) {
-      if (this === null) {
-        throw new TypeError(
-          "Array.prototype.reduce called on null or undefined"
-        );
-      }
 
-      if (typeof callback !== "function") {
-        throw new TypeError(callback + " is not a function");
-      }
+  Array.prototype.reduce = function(callback) {
+    if (this === null) {
+      throw new TypeError("Array.prototype.reduce called on null or undefined");
+    }
 
-      // 1. Let O be ? ToObject(this value).
-      var o = Object(this);
+    if (typeof callback !== "function") {
+      throw new TypeError(callback + " is not a function");
+    }
 
-      // 2. Let len be ? ToLength(? Get(O, "length")).
-      var len = o.length >>> 0;
+    // 1. Let O be ? ToObject(this value).
+    var o = Object(this);
 
-      // Steps 3, 4, 5, 6, 7
-      var k = 0;
-      var value;
+    // 2. Let len be ? ToLength(? Get(O, "length")).
+    var len = o.length >>> 0;
 
-      if (arguments.length >= 2) {
-        value = arguments[1];
-      } else {
-        while (k < len && !(k in o)) {
-          k++;
-        }
+    // Steps 3, 4, 5, 6, 7
+    var k = 0;
+    var value;
 
-        // 3. If len is 0 and initialValue is not present,
-        //    throw a TypeError exception.
-        if (k >= len) {
-          throw new TypeError(
-            "Reduce of empty array " + "with no initial value"
-          );
-        }
-        value = o[k++];
-      }
-
-      // 8. Repeat, while k < len
-      while (k < len) {
-        // a. Let Pk be ! ToString(k).
-        // b. Let kPresent be ? HasProperty(O, Pk).
-        // c. If kPresent is true, then
-        //    i.  Let kValue be ? Get(O, Pk).
-        //    ii. Let accumulator be ? Call(
-        //          callbackfn, undefined,
-        //          « accumulator, kValue, k, O »).
-        if (k in o) {
-          value = callback(value, o[k], k, o);
-        }
-
-        // d. Increase k by 1.
+    if (arguments.length >= 2) {
+      value = arguments[1];
+    } else {
+      while (k < len && !(k in o)) {
         k++;
       }
 
-      // 9. Return accumulator.
-      return value;
-    };
-  }
+      // 3. If len is 0 and initialValue is not present,
+      //    throw a TypeError exception.
+      if (k >= len) {
+        throw new TypeError("Reduce of empty array " + "with no initial value");
+      }
+      value = o[k++];
+    }
+
+    // 8. Repeat, while k < len
+    while (k < len) {
+      // a. Let Pk be ! ToString(k).
+      // b. Let kPresent be ? HasProperty(O, Pk).
+      // c. If kPresent is true, then
+      //    i.  Let kValue be ? Get(O, Pk).
+      //    ii. Let accumulator be ? Call(
+      //          callbackfn, undefined,
+      //          « accumulator, kValue, k, O »).
+      if (k in o) {
+        value = callback(value, o[k], k, o);
+      }
+
+      // d. Increase k by 1.
+      k++;
+    }
+
+    // 9. Return accumulator.
+    return value;
+  };
 
   var doc = null;
   try {
@@ -144,12 +133,21 @@
     { type: "ic14", size: 512 }
   ];
 
+  var itemsFormat = {};
   function genItemsName() {
     return apps.reduce(function(names, app) {
       formats.reduce(function(names, f) {
-        names.push(app + "_" + f.size + "x" + f.size);
+        var name = app + "_" + f.size + "x" + f.size;
+        names.push(name);
+        itemsFormat[name] = {};
+        itemsFormat.type = f.type;
+        itemsFormats.size = f.size;
         variant.reduce(function(names, v) {
-          names.push(app + "_" + v + "_" + f.size + "x" + f.size);
+          var name = app + "_" + v + "_" + f.size + "x" + f.size;
+          names.push(name);
+          itemsFormat[name] = {};
+          itemsFormat.type = f.type;
+          itemsFormats.size = f.size;
           return names;
         }, names);
         return names;
@@ -157,39 +155,36 @@
       return names;
     }, []);
   }
-  var items = genItemsName();
 
+  var items = genItemsName();
+  var icnsFile = getTargetFile(doc, ".icns");
+  var exported = [];
+  var totalLength = 0;
   for (var i = 0; i < doc.artboards.length; i++) {
     var ab = doc.artboards[i];
     if (items.includes(ab.name)) {
-      //todo export
-      alert("Export de " + ab.name);
+      var format = itemsFormat[ab.name];
+      var filePng = new File(Folder.temp + "/icns-export-temp.png");
+      exportAsPng(filePng, i, format.size);
+      format.png = readFile(filePng);
+      exported.push(format);
+      totalLength += format.png.length;
     }
   }
 
-  /*var totalLength = 0;
-  for (var i = 0; i < formats.length; i++) {
-    var format = formats[i];
-    var filePng = new File(Folder.temp + "/icns-export-temp.png");
-    exportAsPng(filePng, format.size);
-    format.png = readFile(filePng);
-    totalLength += format.png.length;
-  }
-  doc.save();
+  openFile(icnsFile, "w");
 
-  openFile(file, "w");
-
-  writeString(file, "icns");
-  writeInt(file, 8 + 8 * formats.length + totalLength);
-  for (var i = 0; i < formats.length; i++) {
-    var format = formats[i];
-    writeString(file, format.type);
-    writeInt(file, format.png.length + 8);
-    writeString(file, format.png);
+  writeString(icnsFile, "icns");
+  writeInt(icnsFile, 8 + 8 * formats.length + totalLength);
+  for (var i = 0; i < exported.length; i++) {
+    var format = exported[i];
+    writeString(icnsFile, format.type);
+    writeInt(icnsFile, format.png.length + 8);
+    writeString(icnsFile, format.png);
   }
 
-  closeFile(file);
-  alert("Exported to " + decodeURIComponent(file.toString()));*/
+  closeFile(icnsFile);
+  alert("Exported to " + decodeURIComponent(icnsFile.toString()));
 
   function writeInt(file, i) {
     var a = String.fromCharCode((i >> 24) & 255);
@@ -220,15 +215,17 @@
     file.close();
   }
 
-  function exportAsPng(file, size) {
+  function exportAsPng(file, artboardIndex, size) {
     var expType = ExportType.PNG24;
     var exp = new ExportOptionsPNG24();
     exp.antiAliasing = true;
     exp.transparency = this.transparency;
     exp.artBoardClipping = true;
-    exp.horizontalScale = (size / 1024.0) * 100.0;
-    exp.verticalScale = (size / 1024.0) * 100.0;
+    exp.horizontalScale = size;
+    exp.verticalScale = size;
     exp.transparency = true;
+    exp.matte = true;
+    doc.artboards.setActiveArtboardIndex(artboardIndex);
 
     doc.exportFile(file, expType, exp);
   }
