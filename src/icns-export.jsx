@@ -92,7 +92,7 @@
 
   for (var i = 0; i < doc.artboards.length; i++) {
     var ab = doc.artboards[i];
-    if (items.includes(ab.name)) {
+    if (items.indexOf(ab.name) > -1) {
       var format = itemsFormat[ab.name];
       var appX = icnsApps[format.app];
       var path = Folder.temp + "/" + ab.name + ".png";
