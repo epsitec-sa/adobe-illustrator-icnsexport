@@ -90,19 +90,18 @@
     return icns;
   }, {});
 
-  for (var i = 0; i < doc.artboards.length; i++) {
-    var ab = doc.artboards[i];
-    if (items.indexOf(ab.name) > -1) {
-      var format = itemsFormat[ab.name];
-      var appX = icnsApps[format.app];
-      var path = `${Folder.temp}/${ab.name}.png`;
-      var filePng = new File(path);
+  doc.artboards
+    .filter(ab => items.indexOf(ab.name))
+    .forEach(ab => {
+      const format = itemsFormat[ab.name];
+      const appX = icnsApps[format.app];
+      const path = `${Folder.temp}/${ab.name}.png`;
+      const filePng = new File(path);
       exportAsPng(filePng, i);
       format.png = readFile(filePng);
       appX.exported.push(format);
       appX.totalLength += format.png.length;
-    }
-  }
+    });
 
   apps.forEach(app => {
     const icns = icnsApps[app];
