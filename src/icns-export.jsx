@@ -37,7 +37,7 @@
   }
 
   const apps = [
-    "cc"
+    "cc",
     "cf",
     "cs",
     "pe",
