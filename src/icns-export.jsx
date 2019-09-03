@@ -155,7 +155,6 @@
     var exp = new ExportOptionsPNG24();
     exp.antiAliasing = true;
     exp.artBoardClipping = true;
-    exp.horizontalScale = 100.0;
     exp.transparency = true;
     exp.matte = true;
 
