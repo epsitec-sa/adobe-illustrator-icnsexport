@@ -58,11 +58,11 @@
     { type: "ic07", size: 128 },
     { type: "ic08", size: 256 },
     { type: "ic09", size: 512 },
+    { type: "ic10", size: 1024 }
     { type: "ic11", size: 32 },
     { type: "ic12", size: 64 },
     { type: "ic13", size: 256 },
     { type: "ic14", size: 512 },
-    { type: "ic10", size: 1024 }
   ];
 
   var itemsFormat = {};
