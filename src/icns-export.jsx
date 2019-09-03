@@ -36,21 +36,6 @@
     return;
   }
 
-  const apps = [
-    "cc",
-    "cf",
-    "cs",
-    "pe",
-    "cc_safe",
-    "cf_safe",
-    "cs_safe",
-    "pe_safe",
-    "cc_doc",
-    "cf_doc",
-    "cs_doc",
-    "pe_doc"
-  ];
-
   const formats = [
     { type: "icp4", size: 16 },
     { type: "icp5", size: 32 },
@@ -64,6 +49,36 @@
     { type: "ic13", size: 256 },
     { type: "ic14", size: 512 }
   ];
+
+  const apps = [];
+  const layers = {};
+
+  const docLayers = [];
+  const docArtboards = [];
+
+  function init() {
+    for (const i = 0; i < doc.artboards; i++) {
+      docArtboards.push(doc.artboards[i]);
+    }
+    for (const i = 0; i < doc.layers; i++) {
+      docLayers.push(doc.layers[i]);
+    }
+
+    docLayers
+      .filter(layer => /<[a-z]+>/.test(layer.name))
+      .forEach(layer => {
+        const app = layer.name.replace(/.*<([a-z]+)>.*/, "$1");
+        if (apps.indexOf(app) < 0) {
+          apps.push(app);
+        }
+        if (!layers[app]) {
+          layers[app] = [];
+        }
+        layers[app].push(layer);
+      });
+  }
+
+  init();
 
   var itemsFormat = {};
 
@@ -91,17 +106,26 @@
     return icns;
   }, {});
 
-  doc.artboards
-    .filter(ab => items.indexOf(ab.name) >= 0)
-    .forEach(ab => {
-      const format = itemsFormat[ab.name];
-      const path = `${Folder.temp}/${ab.name}.png`;
-      const filePng = new File(path);
-      exportAsPng(filePng, i);
-      format.png = readFile(filePng);
-      icnsApps[format.app].exported.push(format);
-      icnsApps[format.app].totalLength += format.png.length;
+  apps.forEach(app => {
+    /* Change layer visibility according to the current app */
+    Object.keys(layers).forEach(_app => {
+      layers[_app].forEach(layer => {
+        layer.visible = _app === app;
+      });
     });
+
+    docArtboards
+      .filter(ab => /[0-9]+x[0-9]+/.test(ab.name))
+      .forEach(ab => {
+        const format = itemsFormat[`${app}_${ab.name}`];
+        const path = `${Folder.temp}/${app}_${ab.name}.png`;
+        const filePng = new File(path);
+        exportAsPng(filePng, i);
+        format.png = readFile(filePng);
+        icnsApps[format.app].exported.push(format);
+        icnsApps[format.app].totalLength += format.png.length;
+      });
+  });
 
   apps.forEach(app => {
     const icns = icnsApps[app];
