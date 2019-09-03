@@ -66,13 +66,14 @@
   ];
 
   var itemsFormat = {};
+
   function genItemsName() {
-    return apps.reduce(function(names, appName) {
+    return apps.reduce(function(names, app) {
       formats.reduce(function(names, f) {
-        var name = `${appName}_${f.size}x${f.size}`;
+        var name = `${app}_${f.size}x${f.size}`;
         names.push(name);
         itemsFormat[name] = {};
-        itemsFormat[name].app = appName;
+        itemsFormat[name].app = app;
         itemsFormat[name].type = f.type;
         itemsFormat[name].size = f.size;
         return names;
