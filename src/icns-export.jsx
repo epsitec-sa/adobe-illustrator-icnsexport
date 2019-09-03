@@ -91,7 +91,7 @@
   }, {});
 
   doc.artboards
-    .filter(ab => items.indexOf(ab.name))
+    .filter(ab => items.indexOf(ab.name) >= 0)
     .forEach(ab => {
       const format = itemsFormat[ab.name];
       const path = `${Folder.temp}/${ab.name}.png`;
