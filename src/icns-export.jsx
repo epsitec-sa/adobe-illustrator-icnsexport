@@ -97,7 +97,7 @@
       var appX = icnsApps[format.app];
       var path = Folder.temp + "/" + ab.name + ".png";
       var filePng = new File(path);
-      exportAsPng(filePng, i, format.size);
+      exportAsPng(filePng, i);
       format.png = readFile(filePng);
       appX.exported.push(format);
       appX.totalLength += format.png.length;
@@ -150,14 +150,13 @@
     file.close();
   }
 
-  function exportAsPng(file, artboardIndex, size) {
+  function exportAsPng(file, artboardIndex) {
     var expType = ExportType.PNG24;
     var exp = new ExportOptionsPNG24();
     exp.antiAliasing = true;
     exp.transparency = this.transparency;
     exp.artBoardClipping = true;
-    exp.horizontalScale = size;
-    exp.verticalScale = size;
+    exp.horizontalScale = 100.0;
     exp.transparency = true;
     exp.matte = true;
 
