@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "This script allows to export icons created in Adobe Illustrator directly to a multiresolution .icns file. It has been tested for CS6.",
   "scripts": {
-    "build": "babel src -d lib",
+    "build": "npx extendscriptr --target illustrator --script src/icns-export.jsx --output lib/icns-export.jsx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,8 +17,7 @@
   },
   "homepage": "https://github.com/epsitec-sa/adobe-illustrator-icnsexport#readme",
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "babel-preset-extendscript": "^1.0.2"
-  }
+    "extendscriptr": "^1.2.4"
+  },
+  "dependencies": {}
 }
