@@ -94,10 +94,13 @@
     .filter(ab => items.indexOf(ab.name))
     .forEach(ab => {
       const format = itemsFormat[ab.name];
+      const appX = icnsApps[format.app];
       const path = `${Folder.temp}/${ab.name}.png`;
       const filePng = new File(path);
       exportAsPng(filePng, i);
       format.png = readFile(filePng);
+      appX.exported.push(format);
+      appX.totalLength += format.png.length;
     });
 
   apps.forEach(app => {
