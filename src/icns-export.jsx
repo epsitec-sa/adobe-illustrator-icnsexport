@@ -36,22 +36,22 @@
     return;
   }
 
-  var apps = [
-    "cs",
-    "cc",
+  const apps = [
+    "cc"
     "cf",
+    "cs",
     "pe",
-    "cs_safe",
     "cc_safe",
     "cf_safe",
+    "cs_safe",
     "pe_safe",
-    "cs_doc",
     "cc_doc",
     "cf_doc",
+    "cs_doc",
     "pe_doc"
   ];
 
-  var formats = [
+  const formats = [
     { type: "icp4", size: 16 },
     { type: "icp5", size: 32 },
     { type: "icp6", size: 64 },
