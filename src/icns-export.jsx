@@ -104,9 +104,9 @@
     }
   }
 
-  for (var a = 0; a < apps.length; a++) {
-    var icns = icnsApps[a];
-    var icnsFile = icns.handle;
+  apps.forEach(app => {
+    const icns = icnsApps[app];
+    const icnsFile = icns.handle;
     openFile(icnsFile, "w");
     writeString(icnsFile, "icns");
     writeInt(icnsFile, 8 + 8 * formats.length + icns.totalLength);
@@ -118,8 +118,9 @@
     }
 
     closeFile(icnsFile);
-    alert("Exported to " + decodeURIComponent(icnsFile.toString()));
-  }
+  });
+
+  alert("All icons are exported");
 
   function writeInt(file, i) {
     var a = String.fromCharCode((i >> 24) & 255);
