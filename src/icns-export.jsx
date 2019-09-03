@@ -69,7 +69,7 @@
   function genItemsName() {
     return apps.reduce(function(names, appName) {
       formats.reduce(function(names, f) {
-        var name = `${f.size}x${f.size}`;
+        var name = `${appName}_${f.size}x${f.size}`;
         names.push(name);
         itemsFormat[name] = {};
         itemsFormat[name].app = appName;
