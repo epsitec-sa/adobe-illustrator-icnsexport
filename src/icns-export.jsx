@@ -69,7 +69,7 @@
   function genItemsName() {
     return apps.reduce(function(names, appName) {
       formats.reduce(function(names, f) {
-        var name = appName + "_" + f.size + "x" + f.size;
+        var name = `${f.size}x${f.size}`;
         names.push(name);
         itemsFormat[name] = {};
         itemsFormat[name].app = appName;
@@ -94,13 +94,12 @@
     .filter(ab => items.indexOf(ab.name))
     .forEach(ab => {
       const format = itemsFormat[ab.name];
-      const appX = icnsApps[format.app];
       const path = `${Folder.temp}/${ab.name}.png`;
       const filePng = new File(path);
       exportAsPng(filePng, i);
       format.png = readFile(filePng);
-      appX.exported.push(format);
-      appX.totalLength += format.png.length;
+      icnsApps[format.app].exported.push(format);
+      icnsApps[format.app].totalLength += format.png.length;
     });
 
   apps.forEach(app => {
