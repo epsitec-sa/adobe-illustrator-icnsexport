@@ -82,11 +82,11 @@
   }
 
   var items = genItemsName();
-  var icnsApps = apps.reduce(function(icns, a) {
-    icns[a] = {};
-    icns[a].handle = getTargetFile(doc, a + ".icns");
-    icns[a].totalLength = 0;
-    icns[a].exported = [];
+  var icnsApps = apps.reduce(function(icns, app) {
+    icns[app] = {};
+    icns[app].handle = getTargetFile(doc, `${app}.icns`);
+    icns[app].totalLength = 0;
+    icns[app].exported = [];
     return icns;
   }, {});
 
@@ -95,7 +95,7 @@
     if (items.indexOf(ab.name) > -1) {
       var format = itemsFormat[ab.name];
       var appX = icnsApps[format.app];
-      var path = Folder.temp + "/" + ab.name + ".png";
+      var path = `${Folder.temp}/${ab.name}.png`;
       var filePng = new File(path);
       exportAsPng(filePng, i);
       format.png = readFile(filePng);
