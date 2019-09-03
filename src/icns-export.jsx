@@ -110,12 +110,12 @@
     openFile(icnsFile, "w");
     writeString(icnsFile, "icns");
     writeInt(icnsFile, 8 + 8 * formats.length + icns.totalLength);
-    for (var i = 0; i < icns.exported.length; i++) {
-      var format = icns.exported[i];
+
+    icns.exported.forEach(format => {
       writeString(icnsFile, format.type);
       writeInt(icnsFile, format.png.length + 8);
       writeString(icnsFile, format.png);
-    }
+    });
 
     closeFile(icnsFile);
   });
