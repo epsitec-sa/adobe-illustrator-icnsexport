@@ -108,11 +108,13 @@
 
   apps.forEach(app => {
     /* Change layer visibility according to the current app */
-    Object.keys(layers).forEach(_app => {
-      layers[_app].forEach(layer => {
-        layer.visible = _app === app;
-      });
-    });
+    for (const _app in layers) {
+      if (layers.hasOwnProperty(_app)) {
+        layers[_app].forEach(layer => {
+          layer.visible = _app === app;
+        });
+      }
+    }
 
     docArtboards
       .filter(ab => /[0-9]+x[0-9]+/.test(ab.name))
