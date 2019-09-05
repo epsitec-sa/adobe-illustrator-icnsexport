@@ -118,7 +118,7 @@
 
     docArtboards
       .filter(ab => /[0-9]+x[0-9]+/.test(ab.name))
-      .forEach(ab => {
+      .forEach((ab, i) => {
         const format = itemsFormat[`${app}_${ab.name}`];
         const path = `${Folder.temp}/${app}_${ab.name}.png`;
         const filePng = new File(path);
