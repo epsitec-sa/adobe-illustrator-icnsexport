@@ -57,10 +57,10 @@
   const docArtboards = [];
 
   function init() {
-    for (const i = 0; i < doc.artboards; i++) {
+    for (let i = 0; i < doc.artboards.length; i++) {
       docArtboards.push(doc.artboards[i]);
     }
-    for (const i = 0; i < doc.layers; i++) {
+    for (let i = 0; i < doc.layers.length; i++) {
       docLayers.push(doc.layers[i]);
     }
 
