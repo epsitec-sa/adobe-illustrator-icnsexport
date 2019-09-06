@@ -98,9 +98,12 @@
   }
 
   var items = genItemsName();
+
+  const dir = getTargetDir(doc);
+
   var icnsApps = apps.reduce(function(icns, app) {
     icns[app] = {};
-    icns[app].handle = getTargetFile(doc, `${app}.icns`);
+    icns[app].handle = getTargetFile(dir, doc, app, "icns");
     icns[app].totalLength = 0;
     icns[app].exported = [];
     return icns;
@@ -191,29 +194,12 @@
     doc.exportFile(file, expType, exp);
   }
 
-  function getTargetFile(doc, ext) {
-    var destFolder = Folder.selectDialog(
-      "Select folder for " + ext + " file.",
-      "~"
-    );
+  function getTargetDir(doc) {
+    return Folder.selectDialog("Select folder for the icons.", "~");
+  }
 
-    if (destFolder) {
-      var newName = "";
-
-      // if name has no dot (and hence no extension),
-      // just append the extension
-      if (doc.name.indexOf(".") < 0) {
-        newName = doc.name + ext;
-      } else {
-        var dot = doc.name.lastIndexOf(".");
-        newName += doc.name.substring(0, dot);
-        newName += ext;
-      }
-
-      // Create the file object to save to
-      return new File(destFolder + "/" + newName);
-    } else {
-      return null;
-    }
+  function getTargetFile(dir, doc, app, ext) {
+    const fileName = `${doc.name}-${app}.${ext}`;
+    return new File(`${dir}/${fileName}`);
   }
 })();
