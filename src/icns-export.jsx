@@ -111,6 +111,73 @@ Format.prototype.getFormat = function(size) {
 
 /* -------------------------------------------------------------------------- */
 
+function ICO(doc, fs) {
+  this._format = new Format(doc, [
+    new Image("", 256),
+    new Image("", 128),
+    new Image("", 96),
+    new Image("", 64),
+    new Image("", 48),
+    new Image("", 32),
+    new Image("", 24),
+    new Image("", 16)
+  ]);
+  this._fs = fs;
+  this._pngs = {};
+}
+
+ICO.prototype.getFormat = function(size) {
+  return this._format.getFormat(size);
+};
+
+ICO.prototype.setPNG = function(png, size) {
+  this._pngs[size] = png;
+};
+
+ICO.prototype.write = function(app) {
+  const dataList = [];
+  const file = this._fs.createFile(app, "ico");
+
+  for (const size in this._pngs) {
+    const png = this._pngs[size];
+    const data = Document.readFile(png);
+    dataList.push({ size, data });
+  }
+
+  let topOffset = 6 + dataList.length * 16;
+
+  dataList.forEach(entry => {
+    entry.offset = topOffset;
+    topOffset += entry.data.length;
+  });
+
+  Document.openFile(file, "w", () => {
+    /* ICONDIR */
+    FileSystem.write16Little(file, 0);
+    FileSystem.write16Little(file, 1); /* .ICO type */
+    FileSystem.write16Little(file, dataList.length); /* Number of images */
+
+    /* ICONDIRENTRY */
+    dataList.forEach(({ size, data, offset }) => {
+      FileSystem.write8(file, size == 256 ? 0 : size); /* width */
+      FileSystem.write8(file, size == 256 ? 0 : size); /* height */
+      FileSystem.write8(file, 0); /* no color palette */
+      FileSystem.write8(file, 0); /* reserved */
+      FileSystem.write16Little(file, 0); /* color plane */
+      FileSystem.write16Little(file, 0); /* 0 for PNG */
+      FileSystem.write32Little(file, data.length); /* data image size */
+      FileSystem.write32Little(file, offset); /* data offset */
+    });
+
+    /* Referenced image data */
+    dataList.forEach(({ data }) => {
+      FileSystem.writeString(file, data);
+    });
+  });
+};
+
+/* -------------------------------------------------------------------------- */
+
 function ICNS(doc, fs) {
   this._format = new Format(doc, [
     new Image("icp4", 16),
