@@ -254,6 +254,18 @@ Document.prototype.exportPNG = function(file, artboardIdx) {
   this._doc.exportFile(file, expType, exp);
 };
 
+Document.prototype.exportSVG = function(file, artboardIdx) {
+  var expType = ExportType.SVG;
+  var exp = new ExportOptionsSVG();
+
+  exp.embedRasterImages = true;
+  exp.embedAllFonts = true;
+  exp.fontSubsetting = SVGFontSubsetting.GLYPHSUSED;
+
+  this._doc.artboards.setActiveArtboardIndex(artboardIdx);
+  this._doc.exportFile(file, expType, exp);
+};
+
 Document.readFile = function(file) {
   let buffer = null;
   Document.openFile(file, "r", () => {

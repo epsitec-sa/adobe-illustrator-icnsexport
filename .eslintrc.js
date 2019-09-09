@@ -9,9 +9,11 @@ module.exports = {
     Atomics: "readonly",
     ExportType: "readonly",
     ExportOptionsPNG24: "readonly",
+    ExportOptionsSVG: "readonly",
     File: "readonly",
     Folder: "readonly",
-    SharedArrayBuffer: "readonly"
+    SharedArrayBuffer: "readonly",
+    SVGFontSubsetting: "readonly"
   },
   parserOptions: {
     ecmaVersion: 2018
