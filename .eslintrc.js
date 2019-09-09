@@ -13,7 +13,8 @@ module.exports = {
     File: "readonly",
     Folder: "readonly",
     SharedArrayBuffer: "readonly",
-    SVGFontSubsetting: "readonly"
+    SVGFontSubsetting: "readonly",
+    SVGFontType: "readonly"
   },
   parserOptions: {
     ecmaVersion: 2018

@@ -258,9 +258,12 @@ Document.prototype.exportSVG = function(file, artboardIdx) {
   const expType = ExportType.SVG;
   const exp = new ExportOptionsSVG();
 
+  exp.saveMultipleArtboards = true;
+  exp.artboardRange = "" + (artboardIdx + 1);
   exp.embedRasterImages = true;
   exp.embedAllFonts = true;
   exp.fontSubsetting = SVGFontSubsetting.GLYPHSUSED;
+  exp.fontType = SVGFontType.SVGFONT;
 
   this._doc.artboards.setActiveArtboardIndex(artboardIdx);
   this._doc.exportFile(file, expType, exp);
@@ -357,11 +360,15 @@ Document.openFile = function(file, mode, openCallback) {
     const icons = [new ICNS(doc, fs), new ICO(doc, fs)];
 
     docArtboards
-      .filter(ab => /[0-9]+x[0-9]+/.test(ab.name))
+      .filter(ab => /[0-9]+/.test(ab.name))
       .forEach((ab, idx) => {
-        const size = ab.name.split("x")[0];
+        const size = ab.name;
         const file = fs.createFile(`${app}_${size}`, "png");
         document.exportPNG(file, idx);
+        if (size == 1024) {
+          const file = fs.createFile(`${app}`, "svg");
+          document.exportSVG(file, idx);
+        }
         icons.forEach(icon => icon.getFormat(size) && icon.setPNG(file, size));
       });
 
