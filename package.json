@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/epsitec-sa/adobe-illustrator-icnsexport#readme",
   "devDependencies": {
+    "eslint": "^6.3.0",
     "extendscriptr": "^1.2.4"
   },
   "dependencies": {}
