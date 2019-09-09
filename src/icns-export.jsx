@@ -31,6 +31,7 @@ function FileSystem(doc) {
 
 FileSystem.prototype.selectDir = function(message) {
   this._targetDir = Folder.selectDialog(message, "~");
+  return !!this._targetDir;
 };
 
 FileSystem.prototype.createFile = function(app, ext) {
@@ -323,7 +324,9 @@ Document.openFile = function(file, mode, openCallback) {
   const document = new Document(doc);
   const fs = new FileSystem(doc);
 
-  fs.selectDir("Select the destination folder for the icons");
+  if (!fs.selectDir("Select the destination folder for the icons")) {
+    return;
+  }
 
   apps.forEach(app => {
     /* Change layer visibility according to the current app */
