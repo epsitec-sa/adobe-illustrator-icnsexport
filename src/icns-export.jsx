@@ -22,6 +22,163 @@
  * SOFTWARE.
  */
 
+/* -------------------------------------------------------------------------- */
+
+function FileSystem(doc) {
+  this._doc = doc;
+  this._targetDir = null;
+}
+
+FileSystem.prototype.selectDir = function(message) {
+  this._targetDir = Folder.selectDialog(message, "~");
+};
+
+FileSystem.prototype.createFile = function(app, ext) {
+  return new File(`${this._targetDir}/${this._doc.name}-${app}.${ext}`);
+};
+
+FileSystem.writeInt = function(file, value) {
+  var a = String.fromCharCode((value >> 24) & 255);
+  var b = String.fromCharCode((value >> 16) & 255);
+  var c = String.fromCharCode((value >> 8) & 255);
+  var d = String.fromCharCode((value >> 0) & 255);
+  return file.write(a + b + c + d);
+};
+
+FileSystem.writeString = function(file, str) {
+  file.write(str);
+};
+
+/* -------------------------------------------------------------------------- */
+
+function Image(type, size) {
+  this._type = type;
+  this._size = size;
+  this._location = null;
+}
+
+Image.prototype.getType = function() {
+  return this._type;
+};
+
+Image.prototype.getSize = function() {
+  return this._size;
+};
+
+Image.prototype.setLocation = function(location) {
+  this._location = location;
+};
+
+/* -------------------------------------------------------------------------- */
+
+function Format(doc, formats) {
+  this._doc = doc;
+  this._format = formats;
+  this._formatBySize = {};
+  this._format.forEach(
+    format => (this._formatBySize[format.getSize()] = format)
+  );
+}
+
+Format.prototype.getFormat = function(size) {
+  return this._formatBySize[size];
+};
+
+/* -------------------------------------------------------------------------- */
+
+function ICNS(doc, fs) {
+  this._format = new Format(doc, [
+    new Image("icp4", 16),
+    new Image("icp5", 32),
+    new Image("icp6", 64),
+    new Image("ic07", 128),
+    new Image("ic08", 256),
+    new Image("ic09", 512),
+    new Image("ic10", 1024),
+    new Image("ic11", 32),
+    new Image("ic12", 64),
+    new Image("ic13", 256),
+    new Image("ic14", 512)
+  ]);
+  this._fs = fs;
+  this._pngs = {};
+}
+
+ICNS.prototype.getFormat = function(size) {
+  return this._format.getFormat(size);
+};
+
+ICNS.prototype.setPNG = function(png, size) {
+  this._pngs[size] = png;
+};
+
+ICNS.prototype.write = function(app) {
+  let totalLength = 0;
+  const dataList = [];
+  const file = this._fs.createFile(app, "icns");
+
+  for (const size in this._pngs) {
+    const png = this._pngs[size];
+    const data = Document.readFile(png);
+    const { length } = data;
+    dataList.push({ size, data });
+    totalLength += length;
+  }
+
+  Document.openFile(file, "w", () => {
+    FileSystem.writeString(file, "icns");
+    FileSystem.writeInt(file, 8 + 8 * dataList.length + totalLength);
+
+    dataList.forEach(({ size, data }) => {
+      const format = this.getFormat(size);
+      FileSystem.writeString(file, format.getType());
+      FileSystem.writeInt(file, data.length + 8);
+      FileSystem.writeString(file, data);
+    });
+  });
+};
+
+/* -------------------------------------------------------------------------- */
+
+function Document(doc) {
+  this._doc = doc;
+}
+
+Document.prototype.exportPNG = function(file, artboardIdx) {
+  const expType = ExportType.PNG24;
+  const exp = new ExportOptionsPNG24();
+
+  exp.antiAliasing = true;
+  exp.artBoardClipping = true;
+  exp.transparency = true;
+  exp.matte = true;
+
+  this._doc.artboards.setActiveArtboardIndex(artboardIdx);
+  this._doc.exportFile(file, expType, exp);
+};
+
+Document.readFile = function(file) {
+  let buffer = null;
+  Document.openFile(file, "r", () => {
+    buffer = file.read();
+  });
+  return buffer;
+};
+
+Document.openFile = function(file, mode, openCallback) {
+  file.encoding = "BINARY";
+  if (!file.open(mode)) {
+    throw new Error(`Could not read ${file}`);
+  }
+  try {
+    openCallback();
+  } finally {
+    file.close();
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+
 (function() {
   var doc = null;
   try {
@@ -35,20 +192,6 @@
     alert("You must save your document before exporting it");
     return;
   }
-
-  const formats = [
-    { type: "icp4", size: 16 },
-    { type: "icp5", size: 32 },
-    { type: "icp6", size: 64 },
-    { type: "ic07", size: 128 },
-    { type: "ic08", size: 256 },
-    { type: "ic09", size: 512 },
-    { type: "ic10", size: 1024 },
-    { type: "ic11", size: 32 },
-    { type: "ic12", size: 64 },
-    { type: "ic13", size: 256 },
-    { type: "ic14", size: 512 }
-  ];
 
   const apps = [];
   const layers = {};
@@ -80,126 +223,44 @@
 
   init();
 
-  var itemsFormat = {};
-
-  function genItemsName() {
-    return apps.reduce(function(names, app) {
-      formats.reduce(function(names, f) {
-        var name = `${app}_${f.size}x${f.size}`;
-        names.push(name);
-        itemsFormat[name] = {};
-        itemsFormat[name].app = app;
-        itemsFormat[name].type = f.type;
-        itemsFormat[name].size = f.size;
-        return names;
-      }, names);
-      return names;
-    }, []);
+  if (!apps.length) {
+    alert("No app defined");
+    return;
   }
 
-  var items = genItemsName();
+  const document = new Document(doc);
+  const fs = new FileSystem(doc);
 
-  const dir = getTargetDir(doc);
-
-  var icnsApps = apps.reduce(function(icns, app) {
-    icns[app] = {};
-    icns[app].handle = getTargetFile(dir, doc, app, "icns");
-    icns[app].totalLength = 0;
-    icns[app].exported = [];
-    return icns;
-  }, {});
+  fs.selectDir("Select the destination folder for the icons");
 
   apps.forEach(app => {
     /* Change layer visibility according to the current app */
     for (const _app in layers) {
-      if (layers.hasOwnProperty(_app)) {
+      if (Object.prototype.hasOwnProperty.call(layers, _app)) {
         layers[_app].forEach(layer => {
           layer.visible = _app === app;
         });
       }
     }
 
+    const icns = new ICNS(doc, fs);
+
     docArtboards
       .filter(ab => /[0-9]+x[0-9]+/.test(ab.name))
-      .forEach((ab, i) => {
-        const format = itemsFormat[`${app}_${ab.name}`];
+      .forEach((ab, idx) => {
+        const size = ab.name.split("x")[0];
+        const format = icns.getFormat(size);
         if (!format) {
           return;
         }
-        const path = `${Folder.temp}/${app}_${ab.name}.png`;
-        const filePng = new File(path);
-        exportAsPng(filePng, i);
-        format.png = readFile(filePng);
-        icnsApps[format.app].exported.push(format);
-        icnsApps[format.app].totalLength += format.png.length;
+
+        const file = fs.createFile(`${app}_${size}`, "png");
+        document.exportPNG(file, idx);
+        icns.setPNG(file, size);
       });
-  });
 
-  apps.forEach(app => {
-    const icns = icnsApps[app];
-    const icnsFile = icns.handle;
-    openFile(icnsFile, "w");
-    writeString(icnsFile, "icns");
-    writeInt(icnsFile, 8 + 8 * formats.length + icns.totalLength);
-
-    icns.exported.forEach(format => {
-      writeString(icnsFile, format.type);
-      writeInt(icnsFile, format.png.length + 8);
-      writeString(icnsFile, format.png);
-    });
-
-    closeFile(icnsFile);
+    icns.write(app);
   });
 
   alert("All icons are exported");
-
-  function writeInt(file, i) {
-    var a = String.fromCharCode((i >> 24) & 255);
-    var b = String.fromCharCode((i >> 16) & 255);
-    var c = String.fromCharCode((i >> 8) & 255);
-    var d = String.fromCharCode((i >> 0) & 255);
-    return file.write(a + b + c + d);
-  }
-
-  function writeString(file, str) {
-    file.write(str);
-  }
-
-  function readFile(file) {
-    openFile(file, "r");
-    var result = file.read();
-    closeFile(file);
-    file.remove();
-    return result;
-  }
-
-  function openFile(file, mode) {
-    file.encoding = "BINARY";
-    if (!file.open(mode)) throw new Error("Could not read " + file);
-  }
-
-  function closeFile(file) {
-    file.close();
-  }
-
-  function exportAsPng(file, artboardIndex) {
-    var expType = ExportType.PNG24;
-    var exp = new ExportOptionsPNG24();
-    exp.antiAliasing = true;
-    exp.artBoardClipping = true;
-    exp.transparency = true;
-    exp.matte = true;
-
-    doc.artboards.setActiveArtboardIndex(artboardIndex);
-    doc.exportFile(file, expType, exp);
-  }
-
-  function getTargetDir(doc) {
-    return Folder.selectDialog("Select folder for the icons.", "~");
-  }
-
-  function getTargetFile(dir, doc, app, ext) {
-    const fileName = `${doc.name}-${app}.${ext}`;
-    return new File(`${dir}/${fileName}`);
-  }
 })();
