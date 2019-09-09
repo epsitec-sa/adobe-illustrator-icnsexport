@@ -366,7 +366,7 @@ Document.openFile = function(file, mode, openCallback) {
         const file = fs.createFile(`${app}_${size}`, "png");
         document.exportPNG(file, idx);
         if (size == 1024) {
-          const file = fs.createFile(`${app}`, "svg");
+          const file = fs.createFile(app, "svg");
           document.exportSVG(file, idx);
         }
         icons.forEach(icon => icon.getFormat(size) && icon.setPNG(file, size));
