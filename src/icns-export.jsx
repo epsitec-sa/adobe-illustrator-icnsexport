@@ -335,23 +335,18 @@ Document.openFile = function(file, mode, openCallback) {
       }
     }
 
-    const icns = new ICNS(doc, fs);
+    const icons = [new ICNS(doc, fs), new ICO(doc, fs)];
 
     docArtboards
       .filter(ab => /[0-9]+x[0-9]+/.test(ab.name))
       .forEach((ab, idx) => {
         const size = ab.name.split("x")[0];
-        const format = icns.getFormat(size);
-        if (!format) {
-          return;
-        }
-
         const file = fs.createFile(`${app}_${size}`, "png");
         document.exportPNG(file, idx);
-        icns.setPNG(file, size);
+        icons.forEach(icon => icon.getFormat(size) && icon.setPNG(file, size));
       });
 
-    icns.write(app);
+    icons.forEach(icon => icon.write(app));
   });
 
   alert("All icons are exported");
