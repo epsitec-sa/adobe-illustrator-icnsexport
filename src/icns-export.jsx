@@ -35,7 +35,7 @@ FileSystem.prototype.selectDir = function(message) {
 };
 
 FileSystem.prototype.createFile = function(app, ext) {
-  return new File(`${this._targetDir}/${this._doc.name}-${app}.${ext}`);
+  return new File(`${this._targetDir}/${app}.${ext}`);
 };
 
 FileSystem.prototype.getTargetDir = function() {
