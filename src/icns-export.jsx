@@ -38,6 +38,10 @@ FileSystem.prototype.createFile = function(app, ext) {
   return new File(`${this._targetDir}/${this._doc.name}-${app}.${ext}`);
 };
 
+FileSystem.prototype.getTargetDir = function() {
+  return this._targetDir;
+};
+
 FileSystem.write8 = function(file, value) {
   const a = String.fromCharCode((value >> 0) & 255);
   return file.write(a);
@@ -352,5 +356,5 @@ Document.openFile = function(file, mode, openCallback) {
     icons.forEach(icon => icon.write(app));
   });
 
-  alert("All icons are exported");
+  alert(`All icons are exported to ${fs.getTargetDir()}`);
 })();
