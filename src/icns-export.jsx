@@ -56,6 +56,20 @@ FileSystem.write32Big = function(file, value) {
   return file.write(a + b + c + d);
 };
 
+FileSystem.write16Little = function(file, value) {
+  const a = String.fromCharCode((value >> 8) & 255);
+  const b = String.fromCharCode((value >> 0) & 255);
+  return file.write(b + a);
+};
+
+FileSystem.write32Little = function(file, value) {
+  const a = String.fromCharCode((value >> 24) & 255);
+  const b = String.fromCharCode((value >> 16) & 255);
+  const c = String.fromCharCode((value >> 8) & 255);
+  const d = String.fromCharCode((value >> 0) & 255);
+  return file.write(d + c + b + a);
+};
+
 FileSystem.writeString = function(file, str) {
   file.write(str);
 };
