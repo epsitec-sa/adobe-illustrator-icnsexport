@@ -143,11 +143,15 @@ ICO.prototype.write = function(app) {
   const dataList = [];
   const file = this._fs.createFile(app, "ico");
 
-  for (const size in this._pngs) {
+  this._format.forEach(format => {
+    const size = format.getSize();
     const png = this._pngs[size];
+    if (!png) {
+      return;
+    }
     const data = Document.readFile(png);
     dataList.push({ size, data });
-  }
+  });
 
   let topOffset = 6 + dataList.length * 16;
 
@@ -214,13 +218,17 @@ ICNS.prototype.write = function(app) {
   const dataList = [];
   const file = this._fs.createFile(app, "icns");
 
-  for (const size in this._pngs) {
+  this._format.forEach(format => {
+    const size = format.getSize();
     const png = this._pngs[size];
+    if (!png) {
+      return;
+    }
     const data = Document.readFile(png);
     const { length } = data;
     dataList.push({ size, data });
     totalLength += length;
-  }
+  });
 
   Document.openFile(file, "w", () => {
     FileSystem.writeString(file, "icns");
