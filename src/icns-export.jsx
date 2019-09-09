@@ -42,13 +42,13 @@ FileSystem.write8 = function(file, value) {
   return file.write(a);
 };
 
-FileSystem.write16 = function(file, value) {
+FileSystem.write16Big = function(file, value) {
   const a = String.fromCharCode((value >> 8) & 255);
   const b = String.fromCharCode((value >> 0) & 255);
   return file.write(a + b);
 };
 
-FileSystem.write32 = function(file, value) {
+FileSystem.write32Big = function(file, value) {
   const a = String.fromCharCode((value >> 24) & 255);
   const b = String.fromCharCode((value >> 16) & 255);
   const c = String.fromCharCode((value >> 8) & 255);
@@ -138,12 +138,12 @@ ICNS.prototype.write = function(app) {
 
   Document.openFile(file, "w", () => {
     FileSystem.writeString(file, "icns");
-    FileSystem.write32(file, 8 + 8 * dataList.length + totalLength);
+    FileSystem.write32Big(file, 8 + 8 * dataList.length + totalLength);
 
     dataList.forEach(({ size, data }) => {
       const format = this.getFormat(size);
       FileSystem.writeString(file, format.getType());
-      FileSystem.write32(file, data.length + 8);
+      FileSystem.write32Big(file, data.length + 8);
       FileSystem.writeString(file, data);
     });
   });
