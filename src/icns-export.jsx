@@ -255,8 +255,8 @@ Document.prototype.exportPNG = function(file, artboardIdx) {
 };
 
 Document.prototype.exportSVG = function(file, artboardIdx) {
-  var expType = ExportType.SVG;
-  var exp = new ExportOptionsSVG();
+  const expType = ExportType.SVG;
+  const exp = new ExportOptionsSVG();
 
   exp.embedRasterImages = true;
   exp.embedAllFonts = true;
