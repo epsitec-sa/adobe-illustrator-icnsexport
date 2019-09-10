@@ -353,9 +353,9 @@ Document.openFile = function(file, mode, openCallback) {
     }
 
     docLayers
-      .filter(layer => /<[a-z]+>/.test(layer.name))
+      .filter(layer => /<[a-z_.A-Z0-9]+>/.test(layer.name))
       .forEach(layer => {
-        const app = layer.name.replace(/.*<([a-z]+)>.*/, "$1");
+        const app = layer.name.replace(/.*<([a-z_.A-Z0-9]+)>.*/, "$1");
         if (apps.indexOf(app) < 0) {
           apps.push(app);
         }
