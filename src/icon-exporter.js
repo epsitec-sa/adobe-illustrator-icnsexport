@@ -369,7 +369,7 @@ Document.openFile = function(file, mode, openCallback) {
   init();
 
   if (!apps.length) {
-    alert("No app defined");
+    alert("No <tag> defined");
     return;
   }
 
