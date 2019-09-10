@@ -267,7 +267,8 @@ Document.prototype.exportSVG = function(file, artboardIdx) {
   const exp = new ExportOptionsSVG();
 
   exp.saveMultipleArtboards = true;
-  exp.artboardRange = "" + (artboardIdx + 1);
+  exp.artboardRange = (artboardIdx + 1).toString();
+  exp.preserveEditability = false;
   exp.embedRasterImages = true;
   exp.embedAllFonts = true;
   exp.fontSubsetting = SVGFontSubsetting.GLYPHSUSED;
