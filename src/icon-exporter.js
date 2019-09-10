@@ -292,6 +292,7 @@ Document.prototype.exportSVG = function(file, artboardIdx) {
   if (!tmpFile.length) {
     alert("Couldn't export SVG file sorry");
     tmpFolder.remove();
+    return;
   }
 
   /* Copy the SVG file to the final destination */
