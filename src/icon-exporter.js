@@ -286,7 +286,7 @@ Document.prototype.exportSVG = function(file, artboardIdx) {
     tmpFile.remove();
   }
 
-  this._doc.exportFile(file, expType, exp);
+  this._doc.exportFile(tmpFile, expType, exp);
 
   tmpFile = tmpFolder.getFiles("*.svg");
   if (!tmpFile.length) {
