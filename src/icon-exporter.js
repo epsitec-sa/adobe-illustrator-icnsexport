@@ -117,7 +117,7 @@ Format.prototype.getFormat = function(size) {
 /* -------------------------------------------------------------------------- */
 
 function ICO(doc, fs) {
-  this._format = new Format(doc, [
+  this._formats = [
     new Image("", 256),
     new Image("", 128),
     new Image("", 96),
@@ -126,7 +126,8 @@ function ICO(doc, fs) {
     new Image("", 32),
     new Image("", 24),
     new Image("", 16)
-  ]);
+  ];
+  this._format = new Format(doc, this._formats);
   this._fs = fs;
   this._pngs = {};
 }
@@ -143,7 +144,7 @@ ICO.prototype.write = function(app) {
   const dataList = [];
   const file = this._fs.createFile(app, "ico");
 
-  this._format.forEach(format => {
+  this._formats.forEach(format => {
     const size = format.getSize();
     const png = this._pngs[size];
     if (!png) {
@@ -188,7 +189,7 @@ ICO.prototype.write = function(app) {
 /* -------------------------------------------------------------------------- */
 
 function ICNS(doc, fs) {
-  this._format = new Format(doc, [
+  this._formats = [
     new Image("icp4", 16),
     new Image("icp5", 32),
     new Image("icp6", 64),
@@ -200,7 +201,8 @@ function ICNS(doc, fs) {
     new Image("ic12", 64),
     new Image("ic13", 256),
     new Image("ic14", 512)
-  ]);
+  ];
+  this._format = new Format(doc, this._formats);
   this._fs = fs;
   this._pngs = {};
 }
@@ -218,7 +220,7 @@ ICNS.prototype.write = function(app) {
   const dataList = [];
   const file = this._fs.createFile(app, "icns");
 
-  this._format.forEach(format => {
+  this._formats.forEach(format => {
     const size = format.getSize();
     const png = this._pngs[size];
     if (!png) {
