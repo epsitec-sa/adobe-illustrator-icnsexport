@@ -275,7 +275,28 @@ Document.prototype.exportSVG = function(file, artboardIdx) {
   exp.fontType = SVGFontType.SVGFONT;
 
   this._doc.artboards.setActiveArtboardIndex(artboardIdx);
+
+  /* Export SVG image in a temporaray directory */
+  const tmpFolder = Folder(Folder.temp + `/ai-icon-exporter-${artboardIdx}`);
+  tmpFolder.create();
+  let tmpFile = new File(`${tmpFolder.fsName}/${artboardIdx}.svg`);
+  if (tmpFile.exists) {
+    tmpFile.remove();
+  }
+
   this._doc.exportFile(file, expType, exp);
+
+  tmpFile = tmpFolder.getFiles("*.svg");
+  if (!tmpFile.length) {
+    alert("Couldn't export SVG file sorry");
+    tmpFolder.remove();
+  }
+
+  /* Copy the SVG file to the final destination */
+  tmpFile = tmpFile[0];
+  tmpFile.copy(file);
+  tmpFile.remove();
+  tmpFolder.remove();
 };
 
 Document.readFile = function(file) {
