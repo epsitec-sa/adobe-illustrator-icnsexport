@@ -1,6 +1,6 @@
 {
   "name": "adobe-illustrator-icon-exporter",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "This script allows to export icons created in Adobe Illustrator directly to a multiresolution .icns and .ico files.",
   "scripts": {
     "build": "npx extendscriptr --target illustrator --script src/icon-exporter.js --output lib/icon-exporter.jsx",
