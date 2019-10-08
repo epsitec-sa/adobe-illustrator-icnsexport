@@ -200,13 +200,13 @@ function ICNS(doc, fs) {
     new Image("ic07", 128),
     new Image("ic13", 256),
     new Image("ic08", 256),
-    new Image("ic14", 512)
+    new Image("ic14", 512),
     new Image("ic09", 512),
     new Image("ic10", 1024),
     new Image("ic11", 32),
     new Image("icp6", 64),
     new Image("icp5", 32),
-    new Image("icp4", 16),
+    new Image("icp4", 16)
   ];
   this._format = new Format(doc, this._formats);
   this._fs = fs;
