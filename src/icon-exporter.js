@@ -105,35 +105,41 @@ function Format(doc, formats) {
   this._doc = doc;
   this._format = formats;
   this._formatBySize = {};
-  this._format.forEach(
-    format => (this._formatBySize[format.getSize()] = format)
-  );
+  this._format.forEach(format => {
+    const size = format.getSize();
+    if (!this._formatBySize[size]) {
+      this._formatBySize[size] = [];
+    }
+    this._formatBySize[size].push(format);
+  });
 }
 
-Format.prototype.getFormat = function(size) {
-  return this._formatBySize[size];
+Format.prototype.hasFormatSize = function(size) {
+  return this._formatBySize[size] && this._formatBySize[size].length
+    ? true
+    : false;
 };
 
 /* -------------------------------------------------------------------------- */
 
 function ICO(doc, fs) {
   this._formats = [
-    new Image("", 256),
-    new Image("", 128),
-    new Image("", 96),
-    new Image("", 64),
-    new Image("", 48),
-    new Image("", 32),
-    new Image("", 24),
-    new Image("", 16)
+    new Image("7", 256),
+    new Image("6", 128),
+    new Image("5", 96),
+    new Image("4", 64),
+    new Image("3", 48),
+    new Image("2", 32),
+    new Image("1", 24),
+    new Image("0", 16)
   ];
   this._format = new Format(doc, this._formats);
   this._fs = fs;
   this._pngs = {};
 }
 
-ICO.prototype.getFormat = function(size) {
-  return this._format.getFormat(size);
+ICO.prototype.hasFormatSize = function(size) {
+  return this._format.hasFormatSize(size);
 };
 
 ICO.prototype.setPNG = function(png, size) {
@@ -207,8 +213,8 @@ function ICNS(doc, fs) {
   this._pngs = {};
 }
 
-ICNS.prototype.getFormat = function(size) {
-  return this._format.getFormat(size);
+ICNS.prototype.hasFormatSize = function(size) {
+  return this._format.hasFormatSize(size);
 };
 
 ICNS.prototype.setPNG = function(png, size) {
@@ -222,13 +228,14 @@ ICNS.prototype.write = function(app) {
 
   this._formats.forEach(format => {
     const size = format.getSize();
+    const type = format.getType();
     const png = this._pngs[size];
     if (!png) {
       return;
     }
     const data = Document.readFile(png);
     const { length } = data;
-    dataList.push({ size, data });
+    dataList.push({ type, data });
     totalLength += length;
   });
 
@@ -236,9 +243,8 @@ ICNS.prototype.write = function(app) {
     FileSystem.writeString(file, "icns");
     FileSystem.write32Big(file, 8 + 8 * dataList.length + totalLength);
 
-    dataList.forEach(({ size, data }) => {
-      const format = this.getFormat(size);
-      FileSystem.writeString(file, format.getType());
+    dataList.forEach(({ type, data }) => {
+      FileSystem.writeString(file, type);
       FileSystem.write32Big(file, data.length + 8);
       FileSystem.writeString(file, data);
     });
@@ -402,7 +408,9 @@ Document.openFile = function(file, mode, openCallback) {
           const file = fs.createFile(app, "svg");
           document.exportSVG(file, idx);
         }
-        icons.forEach(icon => icon.getFormat(size) && icon.setPNG(file, size));
+        icons.forEach(
+          icon => icon.hasFormatSize(size) && icon.setPNG(file, size)
+        );
       });
 
     icons.forEach(icon => icon.write(app));
